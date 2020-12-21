@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  nginx:
+    image: bitnami/nginx:1.16.0-debian-9-r67
+    ports:
+      - ${HTTP_PORT}:9000
+    volumes:
+      - ./config/nginx/nginx.conf:/opt/bitnami/nginx/conf/server_blocks/nginx.conf:ro
+    depends_on:
+      - app
+    links:
+      - app:app
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      CONFIRM_KEY: ${CONFIRM_KEY}
