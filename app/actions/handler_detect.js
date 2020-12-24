@@ -77,10 +77,10 @@ module.exports = async function({ command, data }) {
 		case 'set_route':
 			return function(msg, client_info) {
 				const { route, user_type } = data;
+				const btnFactory = new ButtonsFactory();
 				switch (user_type) {
 					case PASSENGER:
 						setUserRoute(msg['from_id'], route);
-						const btnFactory = new ButtonsFactory();
 						btnFactory.addButtonsInRow([
 							ButtonsFactory.getTextButton('Сегодня', {command: 'set_day', data: {day: TODAY, user_type: PASSENGER}}, 'primary'),
 							ButtonsFactory.getTextButton('Завтра', {command: 'set_day', data: {day: TOMORROW, user_type: PASSENGER}}, 'primary'),
@@ -90,7 +90,6 @@ module.exports = async function({ command, data }) {
 						break;
 					case DRIVER:
 						setDriverRoute(msg['from_id'], route);
-						const btnFactory = new ButtonsFactory();
 						btnFactory.addButtonsInRow([
 							ButtonsFactory.getTextButton('Сегодня', {command: 'set_day', data: {day: TODAY, user_type: DRIVER}}, 'primary'),
 							ButtonsFactory.getTextButton('Завтра', {command: 'set_day', data: {day: TOMORROW, user_type: DRIVER}}, 'primary'),
@@ -103,6 +102,7 @@ module.exports = async function({ command, data }) {
 		case 'set_day':
 			return function(msg, client_info) {
 				const { day, user_type } = data;
+				const btnFactory = new ButtonsFactory();
 				var date = null;
 				switch (day) {
 					case TODAY:
@@ -144,7 +144,6 @@ module.exports = async function({ command, data }) {
 							msg_text += 'Вы можете ожидать появления новых водителей, ' +
 								'если появятся, мы Вас оповестим, либо сбросить поиск.';
 
-							const btnFactory = new ButtonsFactory();
 							btnFactory.addButtonsInRow([
 								ButtonsFactory.getTextButton('Ожидать водителей', {command: 'wait_driver'}, 'primary'),
 								ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary'),
@@ -188,7 +187,7 @@ module.exports = async function({ command, data }) {
 			};
 		case 'wait_driver':
 			return function(msg, client_info) {
-				
+
 			};
 		default:
 			return function() {};
