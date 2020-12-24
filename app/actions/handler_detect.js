@@ -233,7 +233,7 @@ module.exports = async function({ command, data }) {
 							sendMessage(msg['from_id'], 'Укажите количество мест', btnFactory.value());
 							setUserState(msg['from_id'], STATE_UNDEFINED);
 						} else {
-							sendMessage(msg['from_id'], 'Некорректное значение, повторите снова')ж
+							sendMessage(msg['from_id'], 'Некорректное значение, повторите снова');
 						}
 						break;
 					case STATE_UNDEFINED:
