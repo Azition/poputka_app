@@ -47,7 +47,17 @@ module.exports = {
 		const item = get_driver_item(driver_id);
 		if (!!item) item['date'] = date;
 	},
-	setDriverRideTime: function(driver_id, time) {},
+	setDriverRideTime: function(driver_id, hour, minutes) {
+		const item = get_driver_item(driver_id);
+		if (!!item) {
+			item['date'].setHours(hour);
+			item['date'].setMinutes(minutes);
+		}
+	},
+	setDriverSeatCount: function(driver_id, count) {
+		const item = get_driver_item(driver_id);
+		if (!!item) item['count'] = count;
+	},
 	getDriversByDateAndRoute: function(date, route) {
 		return _.filter(driver_list, (item) => item['date'].getDate() == date.getDate()
 			&& item['date'].getMonth() == date.getMonth()

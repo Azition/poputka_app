@@ -5,7 +5,9 @@ const {
 	setUserRideDate, setDriverRideDate,
 	getUserByID,
 	getDriversByDateAndRoute,
-	removeUser, removeDriver
+	removeUser, removeDriver,
+	setDriverRideTime,
+	setDriverSeatCount
 } = require('../core');
 const {
 	FROM_UFA_TO_CHECKMAGUSH, FROM_CHECKMAGUSH_TO_UFA,
@@ -37,7 +39,7 @@ module.exports = async function({ command, data }) {
 		case 'add_driver':
 			return function(msg, client_info) {
 				const response = getUser(msg['from_id']);
-				const { first_name, last_name } = response;
+				const { first_name, last_name } = response[0];
 				addDriver(msg['from_id'], first_name, last_name);
 
 				const btnFactory = new ButtonsFactory();
@@ -57,7 +59,7 @@ module.exports = async function({ command, data }) {
 		case 'add_passenger':
 			return function(msg, client_info) {
 				const response = getUser(msg['from_id']);
-				const { first_name, last_name } = response;
+				const { first_name, last_name } = response[0];
 				addUser(msg['from_id'], first_name, last_name);
 
 				const btnFactory = new ButtonsFactory();
@@ -182,14 +184,53 @@ module.exports = async function({ command, data }) {
 						break;
 					case DRIVER:
 						setDriverRideDate(msg['from_id'], date);
+						sendMessage(msg['from_id'], 'Укажите время в формате ЧЧ:ММ', {
+							one_time: false,
+							buttons: []
+						}, { payload: JSON.stringify({ command: 'set_time'}) });
 						break;
 				}
 			};
+		case 'set_time':
+			return function(msg, client_info) {
+				msg_text = msg['text'];
+				const re = /^[0-2]\d{1}:[0-5]\d{1}$/;
+				const btnFactory = new ButtonsFactory(false, true);
+				if (re.test(msg_text)) {
+					[hour, minutes] = msg_text.split(':');
+					setDriverRideTime(msg['from_id'], hour, minutes);
+					btnFactory.addButtonsInRow([
+						ButtonsFactory.getTextButton('1', {command: 'set_number_seats', data: {count: 1}}, 'primary'),
+						ButtonsFactory.getTextButton('2', {command: 'set_number_seats', data: {count: 2}}, 'primary'),
+					], 1);
+					btnFactory.addButtonsInRow([
+						ButtonsFactory.getTextButton('3', {command: 'set_number_seats', data: {count: 3}}, 'primary'),
+						ButtonsFactory.getTextButton('4', {command: 'set_number_seats', data: {count: 4}}, 'primary'),
+					], 2);
+					btnFactory.addButtonsInRow([
+						ButtonsFactory.getTextButton('5', {command: 'set_number_seats', data: {count: 5}}, 'primary'),
+						ButtonsFactory.getTextButton('6', {command: 'set_number_seats', data: {count: 6}}, 'primary'),
+					], 3);
+					sendMessage(msg['from_id'], 'Укажите количество мест', btnFactory.value());
+				} else {
+
+				}
+			};
+		case 'set_number_seats':
+			return function(msg, client_info) {
+				const { count } = data;
+				const btnFactory = ButtonsFactory();
+				setDriverSeatCount(msg['from_id'], count);
+				btnFactory.addButtonsInRow([
+					ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary');
+				], 1)
+				sendMessage(msg['from_id'], 'Ожидайте пассажиров', btnFactory.value());
+			}
 		case 'wait_driver':
 			return function(msg, client_info) {
 
 			};
 		default:
-			return function() {};
+			return function(msg, client_info) {};
 	}
 }
