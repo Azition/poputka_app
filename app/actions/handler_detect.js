@@ -7,12 +7,14 @@ const {
 	getDriversByDateAndRoute,
 	removeUser, removeDriver,
 	setDriverRideTime,
-	setDriverSeatCount
+	setDriverSeatCount,
+	setUserState, getUserState
 } = require('../core');
 const {
 	FROM_UFA_TO_CHECKMAGUSH, FROM_CHECKMAGUSH_TO_UFA,
 	PASSENGER, DRIVER,
-	TODAY, TOMORROW, OTHER, SET_OTHER
+	TODAY, TOMORROW, OTHER, SET_OTHER,
+	STATE_UNDEFINED, STATE_SET_TIME
 } = require('../constants');
 const { 
 	getTodayDate, getTomorrowDate, 
@@ -184,36 +186,12 @@ module.exports = async function({ command, data }) {
 						break;
 					case DRIVER:
 						setDriverRideDate(msg['from_id'], date);
+						setUserState(msg['from_id'], STATE_SET_TIME);
 						sendMessage(msg['from_id'], 'Укажите время в формате ЧЧ:ММ', {
 							one_time: false,
 							buttons: []
-						}, { payload: JSON.stringify({ command: 'set_time'}) });
+						});
 						break;
-				}
-			};
-		case 'set_time':
-			return function(msg, client_info) {
-				msg_text = msg['text'];
-				const re = /^[0-2]\d{1}:[0-5]\d{1}$/;
-				const btnFactory = new ButtonsFactory(false, true);
-				if (re.test(msg_text)) {
-					[hour, minutes] = msg_text.split(':');
-					setDriverRideTime(msg['from_id'], hour, minutes);
-					btnFactory.addButtonsInRow([
-						ButtonsFactory.getTextButton('1', {command: 'set_number_seats', data: {count: 1}}, 'primary'),
-						ButtonsFactory.getTextButton('2', {command: 'set_number_seats', data: {count: 2}}, 'primary'),
-					], 1);
-					btnFactory.addButtonsInRow([
-						ButtonsFactory.getTextButton('3', {command: 'set_number_seats', data: {count: 3}}, 'primary'),
-						ButtonsFactory.getTextButton('4', {command: 'set_number_seats', data: {count: 4}}, 'primary'),
-					], 2);
-					btnFactory.addButtonsInRow([
-						ButtonsFactory.getTextButton('5', {command: 'set_number_seats', data: {count: 5}}, 'primary'),
-						ButtonsFactory.getTextButton('6', {command: 'set_number_seats', data: {count: 6}}, 'primary'),
-					], 3);
-					sendMessage(msg['from_id'], 'Укажите количество мест', btnFactory.value());
-				} else {
-
 				}
 			};
 		case 'set_number_seats':
@@ -231,6 +209,36 @@ module.exports = async function({ command, data }) {
 
 			};
 		default:
-			return function(msg, client_info) {};
+			return function(msg, client_info) {
+				switch (getUserState(msg['from_id'], STATE_UNDEFINED)) {
+					case STATE_SET_TIME:
+						msg_text = msg['text'];
+						const re = /^[0-2]\d{1}:[0-5]\d{1}$/;
+						const btnFactory = new ButtonsFactory(false, true);
+						if (re.test(msg_text)) {
+							[hour, minutes] = msg_text.split(':');
+							setDriverRideTime(msg['from_id'], hour, minutes);
+							btnFactory.addButtonsInRow([
+								ButtonsFactory.getTextButton('1', {command: 'set_number_seats', data: {count: 1}}, 'primary'),
+								ButtonsFactory.getTextButton('2', {command: 'set_number_seats', data: {count: 2}}, 'primary'),
+							], 1);
+							btnFactory.addButtonsInRow([
+								ButtonsFactory.getTextButton('3', {command: 'set_number_seats', data: {count: 3}}, 'primary'),
+								ButtonsFactory.getTextButton('4', {command: 'set_number_seats', data: {count: 4}}, 'primary'),
+							], 2);
+							btnFactory.addButtonsInRow([
+								ButtonsFactory.getTextButton('5', {command: 'set_number_seats', data: {count: 5}}, 'primary'),
+								ButtonsFactory.getTextButton('6', {command: 'set_number_seats', data: {count: 6}}, 'primary'),
+							], 3);
+							sendMessage(msg['from_id'], 'Укажите количество мест', btnFactory.value());
+							setUserState(msg['from_id'], STATE_UNDEFINED);
+						} else {
+							sendMessage(msg['from_id'], 'Некорректное значение, повторите снова')ж
+						}
+						break;
+					case STATE_UNDEFINED:
+						break;
+				}
+			};
 	}
 }

@@ -43,7 +43,7 @@ class ButtonsFactory {
 
 	static createButton(action, params, color = 'secondary') {
 		let __params = {
-			'payload': JSON.stringify(params['payload'] || {})
+			payload: JSON.stringify(params['payload'] || {})
 		};
 
 		switch (action) {

@@ -6,7 +6,9 @@ const constants = {
 	TODAY: 20,
 	TOMORROW: 21,
 	OTHER: 22,
-	SET_OTHER: 23
+	SET_OTHER: 23,
+	STATE_UNDEFINED: -1,
+	STATE_SET_TIME: 0,
 }
 
 module.exports = constants

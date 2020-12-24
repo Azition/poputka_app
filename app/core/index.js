@@ -2,9 +2,11 @@ const _ = require('lodash');
 
 var driver_list = [];
 var user_list = [];
+var user_states = [];
 
 const get_user_item = (user_id) => _.find(user_list, (item) => item['user_id'] == user_id);
 const get_driver_item = (user_id) => _.find(driver_list, (item) => item['user_id'] == user_id);
+const get_user_state_item = (user_id) => _.find(user_states, (item) => item['user_id'] == user_id);
 
 module.exports = {
 	addUser: function(user_id, first_name, last_name) {
@@ -64,5 +66,23 @@ module.exports = {
 			&& item['date'].getFullYear() == date.getFullYear()
 			&& item['route'] == route
 		);
+	},
+	setUserState: function(user_id, state) {
+		const item = get_user_state_item(user_id);
+		if (!item) {
+			user_states.push({
+				user_id,
+				state
+			});
+		} else {
+			item['state'] = state;
+		}
+	},
+	getUserState: function(user_id, default) {
+		return _(user_states)
+			.chain()
+			.find(['user_id', user_id])
+			.get('state', default)
+			.value()
 	}
 }
