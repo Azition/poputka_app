@@ -16,6 +16,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
+    volumes:
+      - ./app:/app
     environment:
       SECRET_KEY: ${SECRET_KEY}
       CONFIRM_KEY: ${CONFIRM_KEY}
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      VK_URL: ${VK_URL}
+      VK_API_VERSION: ${VK_API_VERSION}
