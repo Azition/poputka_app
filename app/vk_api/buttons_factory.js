@@ -22,10 +22,10 @@ class ButtonsFactory {
 		}
 		if (_.inRange(__row, _.size(this.buttons))) {
 			this.buttons[__row].push(button);
-		} else if (_.size(this.buttons) == row) {
+		} else if (_.size(this.buttons) == __row) {
 			this.buttons[__row] = [button];
 		} else {
-			throw "Выход за границу массива";
+			throw "Array key error";
 		}
 	}
 
