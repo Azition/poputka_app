@@ -22,7 +22,7 @@ module.exports = {
 			user_id,
 			peer_id: user_id,
 			message: message || '',
-			keyboard: JSON.stringify(keyboard) || '{}',
+			keyboard: JSON.stringify(keyboard  || {}),
 			random_id: Date.now(),
 			...override
 		})

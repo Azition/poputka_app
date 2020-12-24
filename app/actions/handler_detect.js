@@ -4,7 +4,8 @@ const {
 	setUserRoute, setDriverRoute,
 	setUserRideDate, setDriverRideDate,
 	getUserByID,
-	getDriversByDateAndRoute
+	getDriversByDateAndRoute,
+	removeUser, removeDriver
 } = require('../core');
 const {
 	FROM_UFA_TO_CHECKMAGUSH, FROM_CHECKMAGUSH_TO_UFA,
@@ -16,6 +17,7 @@ const {
 	normalizeDate, isEqualsDates 
 } = require('../utils');
 const { sendMessage, getUser } = require('../vk_api');
+const ButtonsFactory = require('../vk_api/buttons_factory');
 
 const DRIVERS_COUNT = 3;
 
@@ -23,235 +25,81 @@ module.exports = async function({ command, data }) {
 	switch (command) {
 		case 'start':
 			return function(msg, client_info) {
-				sendMessage(msg['from_id'], 'Выберите категорию', {
-					one_time: false,
-					buttons: [
-						[
-							{
-								action: {
-									type: 'text',
-									label: 'Я водитель',
-									payload: JSON.stringify({
-										command: "add_driver"
-									})
-								},
-								color: 'primary'
-							},
-							{
-								action: {
-									type: 'text',
-									label: 'Я пассажир',
-									payload: JSON.stringify({
-										command: "add_passenger"
-									})
-								},
-								color: 'primary'
-							}
-						]
-					],
-					inline: false
-				})
+				removeUser(msg['from_id']);
+				removeDriver(msg['from_id']);
+				const btnFactory = ButtonsFactory();
+				btnFactory.addButtonsInRow([
+					ButtonsFactory.getTextButton('Я водитель', {command: 'add_driver'}, 'primary'),
+					ButtonsFactory.getTextButton('Я пассажир', {command: 'add_passenger'}, 'primary'),
+				], 1);
+				sendMessage(msg['from_id'], 'Выберите категорию', btnFactory.value());
 			};
 		case 'add_driver':
 			return function(msg, client_info) {
 				const response = getUser(msg['from_id']);
 				const { first_name, last_name } = response;
 				addDriver(msg['from_id'], first_name, last_name);
-				sendMessage(msg['from_id'], 'Выберите маршрут', {
-					one_time: false,
-					buttons: [
-						[
-							{
-								action: {
-									type: 'text',
-									label: 'Уфа-Чекмагуш',
-									payload: JSON.stringify({
-										command: "set_route",
-										data: {
-											route: FROM_UFA_TO_CHECKMAGUSH,
-											user_type: DRIVER
-										}
-									})
-								},
-								color: 'primary'
-							}
-						],
-						[
-							{
-								action: {
-									type: 'text',
-									label: 'Чекмагуш-Уфа',
-									payload: JSON.stringify({
-										command: "set_route",
-										data: {
-											route: FROM_CHECKMAGUSH_TO_UFA,
-											user_type: DRIVER
-										}
-									})
-								},
-								color: 'primary'
-							}
-						]
-					],
-					inline: false
-				});
-			}
+
+				const btnFactory = ButtonsFactory();
+				btnFactory.addButtonsInRow([
+					ButtonsFactory.getTextButton('Уфа-Чекмагуш', {
+						command: 'set_route',
+						data: {route: FROM_UFA_TO_CHECKMAGUSH, user_type: DRIVER}
+					}, 'primary'),
+					ButtonsFactory.getTextButton('Чекмагуш-Уфа', {
+						command: "set_route",
+						data: {route: FROM_CHECKMAGUSH_TO_UFA, user_type: DRIVER}
+					}, 'primary'),
+				], 1);
+
+				sendMessage(msg['from_id'], 'Выберите маршрут', btnFactory.value());
+			};
 		case 'add_passenger':
 			return function(msg, client_info) {
 				const response = getUser(msg['from_id']);
 				const { first_name, last_name } = response;
 				addUser(msg['from_id'], first_name, last_name);
-				sendMessage(msg['from_id'], 'Выберите маршрут', {
-					one_time: false,
-					buttons: [
-						[
-							{
-								action: {
-									type: 'text',
-									label: 'Уфа-Чекмагуш',
-									payload: JSON.stringify({
-										command: "set_route",
-										data: {
-											route: FROM_UFA_TO_CHECKMAGUSH,
-											user_type: PASSENGER
-										}
-									})
-								},
-								color: 'primary'
-							}
-						],
-						[
-							{
-								action: {
-									type: 'text',
-									label: 'Чекмагуш-Уфа',
-									payload: JSON.stringify({
-										command: "set_route",
-										data: {
-											route: FROM_CHECKMAGUSH_TO_UFA,
-											user_type: PASSENGER
-										}
-									})
-								},
-								color: 'primary'
-							}
-						]
-					],
-					inline: false
-				});
-			}
+
+				const btnFactory = ButtonsFactory();
+				btnFactory.addButtonsInRow([
+					ButtonsFactory.getTextButton('Уфа-Чекмагуш', {
+						command: 'set_route',
+						data: {route: FROM_UFA_TO_CHECKMAGUSH, user_type: PASSENGER}
+					}, 'primary'),
+					ButtonsFactory.getTextButton('Чекмагуш-Уфа', {
+						command: "set_route",
+						data: {route: FROM_CHECKMAGUSH_TO_UFA, user_type: PASSENGER}
+					}, 'primary'),
+				], 1);
+
+				sendMessage(msg['from_id'], 'Выберите маршрут', btnFactory.value());
+			};
 		case 'set_route':
 			return function(msg, client_info) {
 				const { route, user_type } = data;
 				switch (user_type) {
 					case PASSENGER:
 						setUserRoute(msg['from_id'], route);
-						sendMessage(msg['from_id'], 'Выберите день поездки', {
-							one_time: false,
-							buttons: [
-								[
-									{
-										action: {
-											type: 'text',
-											label: 'Сегодня',
-											payload: JSON.stringify({
-												command: 'set_day',
-												data: {
-													day: TODAY,
-													user_type: PASSENGER
-												}
-											})
-										},
-										color: 'primary'
-									},
-									{
-										action: {
-											type: 'text',
-											label: 'Завтра',
-											payload: JSON.stringify({
-												command: 'set_day',
-												data: {
-													day: TOMORROW,
-													user_type: PASSENGER
-												}
-											})
-										},
-										color: 'primary'
-									},
-									{
-										action: {
-											type: 'text',
-											label: 'Другой день',
-											payload: JSON.stringify({
-												command: 'set_day',
-												data: {
-													day: OTHER,
-													user_type: PASSENGER
-												}
-											})
-										},
-										color: 'primary'
-									}
-								]
-							],
-							inline: false
-						});
+						const btnFactory = new ButtonsFactory();
+						btnFactory.addButtonsInRow([
+							ButtonsFactory.getTextButton('Сегодня', {command: 'set_day', data: {day: TODAY, user_type: PASSENGER}}, 'primary'),
+							ButtonsFactory.getTextButton('Завтра', {command: 'set_day', data: {day: TOMORROW, user_type: PASSENGER}}, 'primary'),
+							ButtonsFactory.getTextButton('Другой день', {command: 'set_day', data: {day: OTHER, user_type: PASSENGER}}, 'primary'),
+						], 1);
+						sendMessage(msg['from_id'], 'Выберите день поездки', btnFactory.value());
 						break;
 					case DRIVER:
 						setDriverRoute(msg['from_id'], route);
-						sendMessage(msg['from_id'], 'Выберите день поездки', {
-							one_time: false,
-							buttons: [
-								[
-									{
-										action: {
-											type: 'text',
-											label: 'Сегодня',
-											payload: JSON.stringify({
-												command: 'set_day',
-												data: {
-													day: TODAY,
-													user_type: DRIVER
-												}
-											})
-										},
-										color: 'primary'
-									},
-									{
-										action: {
-											type: 'text',
-											label: 'Завтра',
-											payload: JSON.stringify({
-												command: 'set_day',
-												data: {
-													day: TOMORROW,
-													user_type: DRIVER
-												}
-											})
-										},
-										color: 'primary'
-									},
-									{
-										action: {
-											type: 'text',
-											label: 'Другой день',
-											payload: JSON.stringify({
-												command: 'set_day',
-												data: {
-													day: OTHER,
-													user_type: DRIVER
-												}
-											})
-										},
-										color: 'primary'
-									}
-								]
-							],
-							inline: false
-						});
+						const btnFactory = new ButtonsFactory();
+						btnFactory.addButtonsInRow([
+							ButtonsFactory.getTextButton('Сегодня', {command: 'set_day', data: {day: TODAY, user_type: DRIVER}}, 'primary'),
+							ButtonsFactory.getTextButton('Завтра', {command: 'set_day', data: {day: TOMORROW, user_type: DRIVER}}, 'primary'),
+							ButtonsFactory.getTextButton('Другой день', {command: 'set_day', data: {day: OTHER, user_type: DRIVER}}, 'primary'),
+						], 1);
+						sendMessage(msg['from_id'], 'Выберите день поездки', btnFactory.value());
 						break;
 				}
-			}
+			};
 		case 'set_day':
 			return function(msg, client_info) {
 				const { day, user_type } = data;
@@ -267,15 +115,7 @@ module.exports = async function({ command, data }) {
 						sendMessage(msg['from_id'], 'Укажите дату в формате ДД:ММ', {
 							one_time: false,
 							buttons: []
-						}, {
-							payload: JSON.stringify({
-								command: 'set_day',
-								data: {
-									day: SET_OTHER,
-									user_type
-								}
-							})
-						})
+						}, {payload: JSON.stringify({command: 'set_day', data: {day: SET_OTHER, user_type}})})
 						break;
 					case SET_OTHER:
 						const { text } = msg;
@@ -294,12 +134,22 @@ module.exports = async function({ command, data }) {
 
 						if (!_.size(drivers)) {
 							if (isEqualsDates(date, getTodayDate())) {
-								msg_text = 'На сегодня водители отсутствуют';
+								msg_text = 'На сегодня водители отсутствуют\n';
 							} else if (isEqualsDates(date, getTomorrowDate())) {
-								msg_text = 'На завтра водители отсутствуют';
+								msg_text = 'На завтра водители отсутствуют\n';
 							} else {
-								msg_text = 'На запрашиваемую дату водители отсутствуют';
+								msg_text = 'На запрашиваемую дату водители отсутствуют.\n';
 							}
+
+							msg_text += 'Вы можете ожидать появления новых водителей, ' +
+								'если появятся, мы Вас оповестим, либо сбросить поиск.';
+
+							const btnFactory = new ButtonsFactory();
+							btnFactory.addButtonsInRow([
+								ButtonsFactory.getTextButton('Ожидать водителей', {command: 'wait_driver'}, 'primary'),
+								ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary'),
+							],1);
+							buttons = btnFactory.value();
 						} else {
 							if (isEqualsDates(date, getTodayDate())) {
 								msg_text = 'Водители на сегодня:\n';
@@ -325,7 +175,6 @@ module.exports = async function({ command, data }) {
 							msg_text += result_str;
 						}
 
-
 						sendMessage(msg['from_id'], msg_text, {
 							one_time: false,
 							buttons,
@@ -336,8 +185,12 @@ module.exports = async function({ command, data }) {
 						setDriverRideDate(msg['from_id'], date);
 						break;
 				}
-			}
+			};
+		case 'wait_driver':
+			return function(msg, client_info) {
+				
+			};
 		default:
-			return function() {}
+			return function() {};
 	}
 }
