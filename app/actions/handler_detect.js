@@ -37,8 +37,8 @@ module.exports = async function({ command, data }) {
 				sendMessage(msg['from_id'], 'Выберите категорию', btnFactory.value());
 			};
 		case 'add_driver':
-			return function(msg, client_info) {
-				const response = getUser(msg['from_id']);
+			return async function(msg, client_info) {
+				const { response } = await getUser(msg['from_id']);
 				const { first_name, last_name } = response[0];
 				addDriver(msg['from_id'], first_name, last_name);
 
@@ -57,8 +57,8 @@ module.exports = async function({ command, data }) {
 				sendMessage(msg['from_id'], 'Выберите маршрут', btnFactory.value());
 			};
 		case 'add_passenger':
-			return function(msg, client_info) {
-				const response = getUser(msg['from_id']);
+			return async function(msg, client_info) {
+				const { response } = await getUser(msg['from_id']);
 				const { first_name, last_name } = response[0];
 				addUser(msg['from_id'], first_name, last_name);
 
