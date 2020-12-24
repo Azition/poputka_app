@@ -212,11 +212,11 @@ module.exports = async function({ command, data }) {
 			return function(msg, client_info) {
 				switch (getUserState(msg['from_id'], STATE_UNDEFINED)) {
 					case STATE_SET_TIME:
-						msg_text = msg['text'];
+						const msg_text = msg['text'];
 						const re = /^[0-2]\d{1}:[0-5]\d{1}$/;
 						const btnFactory = new ButtonsFactory(false, true);
 						if (re.test(msg_text)) {
-							[hour, minutes] = msg_text.split(':');
+							const [hour, minutes] = msg_text.split(':');
 							setDriverRideTime(msg['from_id'], hour, minutes);
 							btnFactory.addButtonsInRow([
 								ButtonsFactory.getTextButton('1', {command: 'set_number_seats', data: {count: 1}}, 'primary'),
