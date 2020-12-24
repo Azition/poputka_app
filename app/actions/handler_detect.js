@@ -27,7 +27,7 @@ module.exports = async function({ command, data }) {
 			return function(msg, client_info) {
 				removeUser(msg['from_id']);
 				removeDriver(msg['from_id']);
-				const btnFactory = ButtonsFactory();
+				const btnFactory = new ButtonsFactory();
 				btnFactory.addButtonsInRow([
 					ButtonsFactory.getTextButton('Я водитель', {command: 'add_driver'}, 'primary'),
 					ButtonsFactory.getTextButton('Я пассажир', {command: 'add_passenger'}, 'primary'),
@@ -40,7 +40,7 @@ module.exports = async function({ command, data }) {
 				const { first_name, last_name } = response;
 				addDriver(msg['from_id'], first_name, last_name);
 
-				const btnFactory = ButtonsFactory();
+				const btnFactory = new ButtonsFactory();
 				btnFactory.addButtonsInRow([
 					ButtonsFactory.getTextButton('Уфа-Чекмагуш', {
 						command: 'set_route',
@@ -60,7 +60,7 @@ module.exports = async function({ command, data }) {
 				const { first_name, last_name } = response;
 				addUser(msg['from_id'], first_name, last_name);
 
-				const btnFactory = ButtonsFactory();
+				const btnFactory = new ButtonsFactory();
 				btnFactory.addButtonsInRow([
 					ButtonsFactory.getTextButton('Уфа-Чекмагуш', {
 						command: 'set_route',
