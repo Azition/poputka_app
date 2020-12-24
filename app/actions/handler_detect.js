@@ -197,7 +197,7 @@ module.exports = async function({ command, data }) {
 		case 'set_number_seats':
 			return function(msg, client_info) {
 				const { count } = data;
-				const btnFactory = ButtonsFactory();
+				const btnFactory = new ButtonsFactory();
 				setDriverSeatCount(msg['from_id'], count);
 				btnFactory.addButtonsInRow([
 					ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary')
@@ -214,7 +214,7 @@ module.exports = async function({ command, data }) {
 					case STATE_SET_TIME:
 						const msg_text = msg['text'];
 						const re = /^[0-2]\d{1}:[0-5]\d{1}$/;
-						const btnFactory = new ButtonsFactory(false, true);
+						const btnFactory = new ButtonsFactory();
 						if (re.test(msg_text)) {
 							const [hour, minutes] = msg_text.split(':');
 							setDriverRideTime(msg['from_id'], hour, minutes);
