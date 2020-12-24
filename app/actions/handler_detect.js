@@ -222,7 +222,7 @@ module.exports = async function({ command, data }) {
 				const btnFactory = ButtonsFactory();
 				setDriverSeatCount(msg['from_id'], count);
 				btnFactory.addButtonsInRow([
-					ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary');
+					ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary')
 				], 1)
 				sendMessage(msg['from_id'], 'Ожидайте пассажиров', btnFactory.value());
 			}
