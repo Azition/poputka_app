@@ -78,11 +78,11 @@ module.exports = {
 			item['state'] = state;
 		}
 	},
-	getUserState: function(user_id, default) {
+	getUserState: function(user_id, value) {
 		return _(user_states)
 			.chain()
 			.find(['user_id', user_id])
-			.get('state', default)
+			.get('state', value)
 			.value()
 	}
 }
