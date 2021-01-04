@@ -175,7 +175,7 @@ module.exports = async function({ command, data }) {
 
 							msg_text += result_str;
 							btnFactory.addButtonsInRow([
-								ButtonsFactory.getCallbackButton('Пример', {command: 'call_back_action', 'primary'})
+								ButtonsFactory.getCallbackButton('Пример', {command: 'call_back_action'}, 'primary')
 							], 1);
 							btnFactory.setInline(true);
 						}
