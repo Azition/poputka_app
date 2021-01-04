@@ -7,7 +7,7 @@ router.use(function(req, res, next) {
 		'Time: ', new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''),
 		' URL: ', req.originalUrl
 	);
-	console.log(req.body);
+	console.log('Request', JSON.stringify(req.body, null, 2));
 	next();
 });
 
