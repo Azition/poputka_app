@@ -14,7 +14,9 @@ module.exports = {
 		if (!item) user_list.push({ 
 			user_id,
 			first_name,
-			last_name
+			last_name,
+			route: null,
+			date: null
 		});
 	},
 	removeUser: function(user_id) {
@@ -25,7 +27,9 @@ module.exports = {
 		if (!item) driver_list.push({ 
 			user_id: driver_id,
 			first_name,
-			last_name
+			last_name,
+			route: null,
+			date: null
 		})
 	},
 	removeDriver: function(driver_id) {
