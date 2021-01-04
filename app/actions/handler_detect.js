@@ -165,8 +165,8 @@ module.exports = async function({ command, data }) {
 								.chunk(DRIVERS_COUNT)
 								.thru(list => list[0])
 								.map(driver => [
-									`${driver.last_name} ${driver.first_name}`,
-									`Отправляется в ${driver.date.getHours()}:${driver.date.getMinutes()}`,
+									`${[driver.last_name, driver.first_name].join(' ').trim()}`,
+									`Отправляется в ${driver.date.toLocaleString('ru-RU', {hour: 'numeric', minute: 'numeric'})}`,
 									''
 								])
 								.flatten()
@@ -174,6 +174,10 @@ module.exports = async function({ command, data }) {
 								.value();
 
 							msg_text += result_str;
+							btnFactory.addButtonsInRow([
+								ButtonsFactory.getCallbackButton('Пример', {command: 'call_back_action', 'primary'})
+							], 1);
+							btnFactory.setInline(true);
 						}
 
 						sendMessage(msg['from_id'], msg_text, btnFactory.value());
