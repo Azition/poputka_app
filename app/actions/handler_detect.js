@@ -134,7 +134,6 @@ module.exports = async function({ command, data }) {
 						const user = getUserByID(msg['from_id']);
 						const drivers = getDriversByDateAndRoute(date, user.route);
 						var msg_text = '';
-						var buttons = [];
 
 						if (!_.size(drivers)) {
 							if (isEqualsDates(date, getTodayDate())) {
@@ -152,7 +151,6 @@ module.exports = async function({ command, data }) {
 								ButtonsFactory.getTextButton('Ожидать водителей', {command: 'wait_driver'}, 'primary'),
 								ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary'),
 							],1);
-							buttons = btnFactory.value();
 						} else {
 							if (isEqualsDates(date, getTodayDate())) {
 								msg_text = 'Водители на сегодня:\n';
@@ -178,19 +176,12 @@ module.exports = async function({ command, data }) {
 							msg_text += result_str;
 						}
 
-						sendMessage(msg['from_id'], msg_text, {
-							one_time: false,
-							buttons,
-							inline: false
-						})
+						sendMessage(msg['from_id'], msg_text, btnFactory.value());
 						break;
 					case DRIVER:
 						setDriverRideDate(msg['from_id'], date);
 						setUserState(msg['from_id'], STATE_SET_TIME);
-						sendMessage(msg['from_id'], 'Укажите время в формате ЧЧ:ММ', {
-							one_time: false,
-							buttons: []
-						});
+						sendMessage(msg['from_id'], 'Укажите время в формате ЧЧ:ММ', btnFactory.value());
 						break;
 				}
 			};
