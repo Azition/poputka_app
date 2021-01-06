@@ -1,29 +1,25 @@
 const _ = require('lodash');
 const {
-	addDriver, addUser,
-	setUserRoute, setDriverRoute,
-	setUserRideDate, setDriverRideDate,
-	getUserByID,
-	getDriversByDateAndRoute,
-	removeUser, removeDriver,
-	setDriverRideTime,
-	setDriverSeatCount,
-	setUserState, getUserState
+	addDriver, addUser, setUserRoute, setDriverRoute,
+	setUserRideDate, setDriverRideDate, getUserByID,
+	getDriversByDateAndRoute, removeUser, removeDriver,
+	setDriverRideTime, setDriverSeatCount,
+	setUserState, getUserState, getDriverInformationText
 } = require('../core');
 const {
 	FROM_UFA_TO_CHECKMAGUSH, FROM_CHECKMAGUSH_TO_UFA,
-	PASSENGER, DRIVER,
-	TODAY, TOMORROW, OTHER, SET_OTHER,
+	PASSENGER, DRIVER, TODAY, TOMORROW, OTHER, SET_OTHER,
 	STATE_UNDEFINED, STATE_SET_TIME
 } = require('../constants');
 const { 
-	getTodayDate, getTomorrowDate, 
-	normalizeDate, isEqualsDates 
+	getTodayDate, getTomorrowDate, normalizeDate, isEqualsDates 
 } = require('../utils');
+const { 
+	getAvailableDriverListAsString,
+	getAvailableDriverListAsButtons
+} = require('./common');
 const { sendMessage, getUser } = require('../vk_api');
 const ButtonsFactory = require('../vk_api/buttons_factory');
-
-const DRIVERS_COUNT = 3;
 
 module.exports = async function({ command, data }) {
 	switch (command) {
@@ -90,6 +86,7 @@ module.exports = async function({ command, data }) {
 							ButtonsFactory.getTextButton('Завтра', {command: 'set_day', data: {day: TOMORROW, user_type: PASSENGER}}, 'primary'),
 							ButtonsFactory.getTextButton('Другой день', {command: 'set_day', data: {day: OTHER, user_type: PASSENGER}}, 'primary'),
 						], 1);
+						btnFactory.setOneTime(true);
 						sendMessage(msg['from_id'], 'Выберите день поездки', btnFactory.value());
 						break;
 					case DRIVER:
@@ -132,51 +129,17 @@ module.exports = async function({ command, data }) {
 					case PASSENGER:
 						setUserRideDate(msg['from_id'], date);
 						const user = getUserByID(msg['from_id']);
-						const drivers = getDriversByDateAndRoute(date, user.route);
-						var msg_text = '';
+						const drivers = getDriversByDateAndRoute(date, user.getRoute());
+						var msg_text = getDriverInformationText(drivers, date);
 
 						if (!_.size(drivers)) {
-							if (isEqualsDates(date, getTodayDate())) {
-								msg_text = 'На сегодня водители отсутствуют\n';
-							} else if (isEqualsDates(date, getTomorrowDate())) {
-								msg_text = 'На завтра водители отсутствуют\n';
-							} else {
-								msg_text = 'На запрашиваемую дату водители отсутствуют.\n';
-							}
-
-							msg_text += 'Вы можете ожидать появления новых водителей, ' +
-								'если появятся, мы Вас оповестим, либо сбросить поиск.';
-
 							btnFactory.addButtonsInRow([
 								ButtonsFactory.getTextButton('Ожидать водителей', {command: 'wait_driver'}, 'primary'),
 								ButtonsFactory.getTextButton('Сбросить', {command: 'start'}, 'primary'),
 							],1);
 						} else {
-							if (isEqualsDates(date, getTodayDate())) {
-								msg_text = 'Водители на сегодня:\n';
-							} else if (isEqualsDates(date, getTomorrowDate())) {
-								msg_text = 'Водители на завтра:\n';
-							} else {
-								msg_text = 'Водители на запрашиваемую дату:\n';
-							}
-
-							const result_str = _(drivers)
-								.chain()
-								.chunk(DRIVERS_COUNT)
-								.thru(list => list[0])
-								.map(driver => [
-									`${[driver.last_name, driver.first_name].join(' ').trim()}`,
-									`Отправляется в ${driver.date.toLocaleString('ru-RU', {hour: 'numeric', minute: 'numeric'})}`,
-									''
-								])
-								.flatten()
-								.join('\n')
-								.value();
-
-							msg_text += result_str;
-							btnFactory.addButtonsInRow([
-								ButtonsFactory.getCallbackButton('Пример', {command: 'call_back_action'}, 'primary')
-							], 1);
+							msg_text += getAvailableDriverListAsString(drivers, 0);
+							getAvailableDriverListAsButtons(btnFactory, drivers, 0);
 							btnFactory.setInline(true);
 						}
 
