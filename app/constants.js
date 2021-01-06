@@ -8,7 +8,7 @@ const constants = {
 	OTHER: 22,
 	SET_OTHER: 23,
 	STATE_UNDEFINED: -1,
-	STATE_SET_TIME: 0,
+	STATE_SET_TIME: 1,
 }
 
 module.exports = constants
