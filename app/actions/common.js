@@ -1,11 +1,15 @@
+const _ = require('lodash');
+const ButtonsFactory = require('../vk_api/buttons_factory');
+
 const DRIVERS_COUNT = 3;
 
 module.exports = {
 	getAvailableDriverListAsString: function(driver_list, page) {
+		let _page = parseInt(page);
 		return _(driver_list)
 			.chain()
 			.chunk(DRIVERS_COUNT)
-			.thru(list => list[page])
+			.thru(list => list[_page])
 			.map(driver => [
 				`${driver.num} ${driver.getFullName()}`,
 				`Отправляется в ${driver.getDate().toLocaleString('ru-RU', {hour: 'numeric', minute: 'numeric'})}`,
@@ -26,7 +30,7 @@ module.exports = {
 					ButtonsFactory.getCallbackButton(`${driver.num} водитель`, {
 						command: 'booking_driver',
 						data: {
-							driver_id: driver['user_id']
+							driver_id: driver.getID()
 						}
 					}, 'primary')
 				], index)
